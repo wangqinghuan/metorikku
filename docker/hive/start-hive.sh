@@ -71,7 +71,15 @@ cat >${HIVE_HOME}/conf/hive-site.xml <<EOL
         <name>fs.s3n.awsSecretAccessKey</name>
         <value>${AWS_SECRET_KEY}</value>
      </property>
+     <property>
+        <name>hive.exec.post.hooks</name>
+        <value>org.apache.atlas.hive.hook.HiveHook</value>
+     </property>
 </configuration>
+EOL
+
+cat >${HIVE_HOME}/conf/hive-env.sh <<EOL
+export HIVE_AUX_JARS_PATH=${ATLAS_HOME}/hook/hive
 EOL
 
 $HIVE_HOME/bin/schematool -dbType ${DB_TYPE} -initSchema
