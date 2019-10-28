@@ -1,8 +1,5 @@
 FROM openjdk:8u212-b04-jre-stretch
 
-ARG AWS_ACCESS_KEY
-ARG AWS_SECRET_KEY
-
 RUN mkdir /opt/atlas
 ENV ATLAS_HOME=/opt/atlas
 ENV HADOOP_HOME=/opt/hadoop
@@ -24,7 +21,7 @@ RUN wget -q http://central.maven.org/maven2/mysql/mysql-connector-java/$MYSQL_CO
     && mv mysql-connector-java-$MYSQL_CONNECTOR_VERSION.jar $HIVE_HOME/lib
 
 ENV HUDI_VERSION=0.4.5
-RUN apt-get update && apt-get install -y ant python3-pip
+RUN apt-get update && apt-get install -y ant 
 RUN wget -q http://central.maven.org/maven2/com/uber/hoodie/hoodie-hive-bundle/$HUDI_VERSION/hoodie-hive-bundle-$HUDI_VERSION.jar \
     && mv hoodie-hive-bundle-$HUDI_VERSION.jar $HIVE_HOME/lib
 RUN wget -q http://central.maven.org/maven2/org/apache/hadoop/hadoop-aws/$HADOOP_VERSION/hadoop-aws-$HADOOP_VERSION.jar \
@@ -40,10 +37,16 @@ RUN wget -q http://central.maven.org/maven2/net/minidev/json-smart/1.1.1/json-sm
     && mv json-smart-1.1.1.jar $HIVE_HOME/lib
 
 ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.5.0/wait /wait
+ADD atlas-application.properties /etc/hive/conf/
 RUN chmod +x /wait
 
-RUN pip3 install awscli
-RUN aws s3 cp s3://yotpo-people/ron/apache-atlas/apache-atlas-3.0.0-SNAPSHOT-hive-hook.tar.gz $ATLAS_HOME
+COPY apache-atlas-hive-hook-3.0.0-SNAPSHOT.tar ${ATLAS_HOME}/hook/hive/
+RUN cd ${ATLAS_HOME}/hook/hive/ && tar xvf apache-atlas-hive-hook-3.0.0-SNAPSHOT.tar && \
+    mv apache-atlas-hive-hook-3.0.0-SNAPSHOT/hook/hive/* ./ && \
+    mv apache-atlas-hive-hook-3.0.0-SNAPSHOT/hook/* ./ && \
+    mv apache-atlas-hive-hook-3.0.0-SNAPSHOT/hook-bin/* ./ && \
+    # mv apache-atlas-hive-hook-3.0.0-SNAPSHOT/atlas-hive-plugin-impl/* ./ && \
+	rm -rf apache-atlas-hive-hook-3.0.0-SNAPSHOT.tar apache-atlas-hive-hook-3.0.0-SNAPSHOT
 
 COPY start-hive.sh /
 COPY log4j.json.properties .
