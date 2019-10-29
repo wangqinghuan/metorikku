@@ -41,12 +41,8 @@ ADD atlas-application.properties /etc/hive/conf/
 RUN chmod +x /wait
 
 COPY apache-atlas-hive-hook-3.0.0-SNAPSHOT.tar ${ATLAS_HOME}/hook/hive/
-RUN cd ${ATLAS_HOME}/hook/hive/ && tar xvf apache-atlas-hive-hook-3.0.0-SNAPSHOT.tar && \
-    mv apache-atlas-hive-hook-3.0.0-SNAPSHOT/hook/hive/* ./ && \
-    mv apache-atlas-hive-hook-3.0.0-SNAPSHOT/hook/* ./ && \
-    mv apache-atlas-hive-hook-3.0.0-SNAPSHOT/hook-bin/* ./ && \
-    # mv apache-atlas-hive-hook-3.0.0-SNAPSHOT/atlas-hive-plugin-impl/* ./ && \
-	rm -rf apache-atlas-hive-hook-3.0.0-SNAPSHOT.tar apache-atlas-hive-hook-3.0.0-SNAPSHOT
+RUN cd ${ATLAS_HOME}/hook/hive/ && tar xvf apache-atlas-hive-hook-3.0.0-SNAPSHOT.tar
+COPY lib ${ATLAS_HOME}/hook/hive/
 
 COPY start-hive.sh /
 COPY log4j.json.properties .
