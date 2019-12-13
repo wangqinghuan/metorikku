@@ -11,12 +11,13 @@ import org.apache.spark.sql.types.{ArrayType, BinaryType, MapType, StructType}
 class JDBCUpsertWriter(props: Map[String, String], config: Option[JDBC]) extends Writer {
 
   case class JDBCUpsertProperties(query: String, queryFields: String, update: String, updateFields: String, insert: String, insertFields: String,
-                                  maxBatchSize: Int, minPartitions: Option[Int], maxPartitions: Option[Int])
+                                  deduplication: Option[Boolean],maxBatchSize: Int, minPartitions: Option[Int], maxPartitions: Option[Int])
 
   @transient lazy val log = LogManager.getLogger(this.getClass)
 
   val defaultMaxBatchSize = 500
   val options = JDBCUpsertProperties(props("query"), props("queryFields"), props("update"), props("updateFields"), props("insert"), props("insertFields"),
+    props.get("deduplication").asInstanceOf[Option[Boolean]],
     props.getOrElse("maxBatchSize", defaultMaxBatchSize).asInstanceOf[Int],
     props.get("minPartitions").asInstanceOf[Option[Int]],
     props.get("maxPartitions").asInstanceOf[Option[Int]])
@@ -45,8 +46,10 @@ class JDBCUpsertWriter(props: Map[String, String], config: Option[JDBC]) extends
               insertSize = insertSize + 1
               doInsert(conn, insertStmt, insertFields, row)
             } else {
-              updateSize = updateSize + 1
-              doUpdate(conn, updateStmt, updateFields, row)
+              if (!options.deduplication.get) {
+                updateSize = updateSize + 1
+                doUpdate(conn, updateStmt, updateFields, row)
+              }
             }
             if (insertSize >= batchSize) {
               insertSize = 0
