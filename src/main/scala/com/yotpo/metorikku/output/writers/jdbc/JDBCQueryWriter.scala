@@ -32,7 +32,7 @@ class JDBCQueryWriter(props: Map[String, String], config: Option[JDBC]) extends 
           partition.grouped(options.maxBatchSize).foreach(batch => {
             batch.foreach(row => {
               for (i <- 1 to queryFields.size) {
-                addValueToStatement(row.get(i-1), stmt, i)
+                addValueToStatement(row.getAs(queryFields(i - 1)), stmt, i)
               }
               stmt.addBatch()
             })
