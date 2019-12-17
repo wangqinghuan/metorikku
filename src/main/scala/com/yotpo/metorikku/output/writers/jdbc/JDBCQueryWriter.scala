@@ -12,12 +12,12 @@ import org.apache.spark.sql.types.{ArrayType, BinaryType, MapType, StructType}
 
 class JDBCQueryWriter(props: Map[String, String], config: Option[JDBC]) extends Writer {
 
-  case class JDBCQueryProperties(query: String, maxBatchSize: Int, minPartitions: Option[Int], maxPartitions: Option[Int])
+  case class JDBCQueryProperties(query: String, queryFields: String, maxBatchSize: Int, minPartitions: Option[Int], maxPartitions: Option[Int])
 
   @transient lazy val log = LogManager.getLogger(this.getClass)
 
   val defaultMaxBatchSize = 500
-  val options = JDBCQueryProperties(props("query"),
+  val options = JDBCQueryProperties(props("query"),props("queryFields"),
     props.getOrElse("maxBatchSize", defaultMaxBatchSize).asInstanceOf[Int],
     props.get("minPartitions").asInstanceOf[Option[Int]],
     props.get("maxPartitions").asInstanceOf[Option[Int]])
@@ -28,10 +28,10 @@ class JDBCQueryWriter(props: Map[String, String], config: Option[JDBC]) extends 
         alignPartitions(dataFrame, options.minPartitions, options.maxPartitions).foreachPartition(partition => {
           val conn = DriverManager.getConnection(config.connectionUrl, config.user, config.password)
           val stmt = conn.prepareStatement(options.query)
-
+          var queryFields = options.queryFields.split(",")
           partition.grouped(options.maxBatchSize).foreach(batch => {
             batch.foreach(row => {
-              for (i <- 1 to row.size) {
+              for (i <- 1 to queryFields.size) {
                 addValueToStatement(row.get(i-1), stmt, i)
               }
               stmt.addBatch()
