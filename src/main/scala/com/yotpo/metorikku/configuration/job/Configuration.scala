@@ -17,7 +17,8 @@ case class Configuration(metrics: Option[Seq[String]],
                          var explain: Option[Boolean],
                          var appName: Option[String],
                          var continueOnFailedStep: Option[Boolean],
-                         var cacheCountOnOutput: Option[Boolean]) {
+                         var cacheCountOnOutput: Option[Boolean],
+                         var executionId: Option[String]) {
 
   require(metrics.isDefined, "metrics files paths are mandatory")
 

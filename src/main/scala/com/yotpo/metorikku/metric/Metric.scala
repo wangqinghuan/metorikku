@@ -28,6 +28,14 @@ case class Metric(configuration: Configuration, metricDir: File, metricName: Str
       try {
         log.info(s"Calculating step ${step.dataFrameName}")
         step.run(job.sparkSession)
+        val dataFrame = job.sparkSession.table(step.dataFrameName)
+        val instrument = stepConfig.instrumentationOptions
+        if(instrument.nonEmpty){
+          var executionId = job.config.executionId.get;
+          val nodeId=  instrument.get("nodeId")
+          val targetId = instrument.get("targetId")
+          job.instrumentationClient.count(name=executionId + "_" + nodeId + "_" + targetId, value=dataFrame.count(), tags=tags)
+        }
         job.instrumentationClient.count(name="successfulSteps", value=1, tags=tags)
       } catch {
         case ex: Exception => {

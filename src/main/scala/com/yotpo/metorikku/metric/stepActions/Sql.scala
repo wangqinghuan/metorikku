@@ -20,6 +20,7 @@ case class Sql(query: String, dataFrameName: String, showPreviewLines: Int,
 
     val newDf = sparkSession.sqlContext.sql(query)
     newDf.createOrReplaceTempView(dataFrameName)
+
     printStep(newDf, dataFrameName)
     newDf
   }

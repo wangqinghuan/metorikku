@@ -12,7 +12,7 @@ import scopt.OptionParser
 object ConfigurationParser {
   val log: Logger = LogManager.getLogger(this.getClass)
 
-  case class ConfigFileName(job: Option[String] = None, filename: Option[String] = None)
+  case class ConfigFileName(job: Option[String] = None, filename: Option[String] = None, executionId: Option[String] = None)
 
   val CLIparser: OptionParser[ConfigFileName] = new scopt.OptionParser[ConfigFileName]("Metorikku") {
     head("Metorikku", "1.0")
@@ -30,6 +30,9 @@ object ConfigurationParser {
           failure("Supplied file not found")
         }
       })
+    opt[String]('e', "executionId")
+      .action((x, c) => c.copy(executionId = Option(x)))
+      .text("Job executionId")
     help("help") text "use command line arguments to specify the configuration file path or content"
   }
 
@@ -41,9 +44,14 @@ object ConfigurationParser {
         arguments.job match {
           case Some(job) => parseConfigurationFile(job, FileUtils.getObjectMapperByExtension("json"))
           case None => arguments.filename match {
-            case Some(filename) => parseConfigurationFile(FileUtils.readConfigurationFile(filename), FileUtils.getObjectMapperByFileName(filename))
+            case Some(filename) => {
+                var conf = parseConfigurationFile(FileUtils.readConfigurationFile(filename), FileUtils.getObjectMapperByFileName(filename))
+                conf.executionId = arguments.executionId;
+                conf
+            }
             case None => throw new MetorikkuException("Failed to parse config file")
           }
+
         }
       case None => throw new MetorikkuException("No arguments passed to metorikku")
     }
