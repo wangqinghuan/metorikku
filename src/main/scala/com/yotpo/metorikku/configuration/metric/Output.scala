@@ -8,7 +8,8 @@ case class Output(name: Option[String],
                   @JsonScalaEnumeration(classOf[OutputTypeReference]) outputType: OutputType.OutputType,
                   repartition: Option[Int],
                   coalesce: Option[Boolean],
-                  outputOptions: Map[String, Any])
+                  outputOptions: Map[String, Any],
+                  instrumentationOptions: Option[Map[String, String]])
 
 object OutputType extends Enumeration {
   type OutputType = Value

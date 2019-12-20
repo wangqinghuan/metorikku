@@ -30,17 +30,17 @@ case class Metric(configuration: Configuration, metricDir: File, metricName: Str
         step.run(job.sparkSession)
         val dataFrame = job.sparkSession.table(step.dataFrameName)
         val instrument = stepConfig.instrumentationOptions
-        if(instrument.nonEmpty){
-          var executionId = job.config.executionId.get;
-          val nodeId=  instrument.get("nodeId")
+        if (instrument.nonEmpty) {
+          val executionId = job.config.executionId.get;
+          val nodeId = instrument.get("nodeId")
           val targetId = instrument.get("targetId")
-          job.instrumentationClient.count(name=executionId + "_" + nodeId + "_" + targetId, value=dataFrame.count(), tags=tags)
+          job.instrumentationClient.count(name = "counter_" + executionId + "_" + nodeId + "_" + targetId, value = dataFrame.count(), tags = tags)
         }
-        job.instrumentationClient.count(name="successfulSteps", value=1, tags=tags)
+        job.instrumentationClient.count(name = "successfulSteps", value = 1, tags = tags)
       } catch {
         case ex: Exception => {
           val errorMessage = s"Failed to calculate dataFrame: ${step.dataFrameName} on metric: ${metricName}"
-          job.instrumentationClient.count(name="failedSteps", value=1, tags=tags)
+          job.instrumentationClient.count(name = "failedSteps", value = 1, tags = tags)
           if (stepConfig.ignoreOnFailures.get || job.config.continueOnFailedStep.get) {
             log.error(errorMessage + " - " + ex.getMessage)
           } else {
@@ -88,10 +88,10 @@ case class Metric(configuration: Configuration, metricDir: File, metricName: Str
                          dataFrameName: String,
                          writer: Writer,
                          outputType: OutputType,
-                         instrumentationProvider: InstrumentationProvider,
-                         cacheCountOnOutput: Option[Boolean]): Unit = {
+                         job: Job,
+                         outputConfig: Output): Unit = {
 
-    val dataFrameCount = cacheCountOnOutput match {
+    val dataFrameCount = job.config.cacheCountOnOutput match {
       case Some(true) => {
         dataFrame.cache()
         dataFrame.count()
@@ -99,7 +99,13 @@ case class Metric(configuration: Configuration, metricDir: File, metricName: Str
       case _ => 0
     }
     val tags = Map("metric" -> metricName, "dataframe" -> dataFrameName, "output_type" -> outputType.toString)
-    instrumentationProvider.count(name="counter", value=dataFrameCount, tags=tags)
+    val instrumenation = outputConfig.instrumentationOptions
+    if (instrumenation.nonEmpty) {
+      val executionId = job.config.executionId.get;
+      val nodeId = outputConfig.instrumentationOptions.get("nodeId");
+      job.instrumentationClient.count(name = "counter_" + executionId + "_" + nodeId, value = dataFrameCount, tags = tags)
+
+    }
     log.info(s"Starting to Write results of ${dataFrameName}")
     try {
       writer.write(dataFrame)
@@ -141,8 +147,11 @@ case class Metric(configuration: Configuration, metricDir: File, metricName: Str
             streamingWriterList += (dataFrameName -> streamingWriterConfig)
           }
           else {
+            /*
+                        writeBatch(dataFrame, dataFrameName, writer,
+                          outputConfig.outputType, job.instrumentationClient, job.config.cacheCountOnOutput)*/
             writeBatch(dataFrame, dataFrameName, writer,
-              outputConfig.outputType, job.instrumentationClient, job.config.cacheCountOnOutput)
+              outputConfig.outputType, job, outputConfig)
           }
         })
 

@@ -37,7 +37,7 @@ class ElasticsearchOutputWriter(props: Map[String, Object], elasticsearchOutputC
       case (Some(resource), _) => resource
       case (None, _) => throw MetorikkuException(s"Target index must be specified under 'resource' option")
     }
-    writer.save(indexName + "/" + elasticsearchOutputProperties.indexType.getOrElse("_doc"))
+    writer.save(indexName + "/" + elasticsearchOutputProperties.indexType.getOrElse("doc"))
   }
 
   override def write(dataFrame: DataFrame): Unit = {

@@ -9,7 +9,7 @@ object Metorikku extends App {
   log.info("Starting Metorikku - Parsing configuration")
   val session = Job(ConfigurationParser.parse(args))
   runMetrics(session)
-
+  session.instrumentationClient.close();
   def runMetrics(job: Job): Unit = {
     job.config.metrics match {
       case Some(metrics) => metrics.foreach(metricSetPath => {

@@ -68,7 +68,9 @@ libraryDependencies ++= Seq(
   "io.confluent" % "kafka-avro-serializer" % "5.1.2" % "provided",
   "com.uber.hoodie" % "hoodie-spark" % "0.4.7" % "provided" excludeAll(excludeHoodieTimeLineService),
   "com.uber.hoodie" % "hoodie-common" % "0.4.7" % "provided" excludeAll(excludeHoodieTimeLineService),
-  "org.apache.hive" % "hive-jdbc" % "1.2.2" % "provided" excludeAll(excludeNetty, excludeNettyAll)
+  "org.apache.hive" % "hive-jdbc" % "1.2.2" % "provided" excludeAll(excludeNetty, excludeNettyAll),
+  "org.elasticsearch.client" % "elasticsearch-rest-high-level-client" % "6.1.3"
+
 )
 
 // Temporary fix for https://github.com/databricks/spark-redshift/issues/315#issuecomment-285294306

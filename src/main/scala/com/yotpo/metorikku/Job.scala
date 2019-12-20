@@ -8,7 +8,7 @@ import com.yotpo.metorikku.output.writers.redis.RedisOutputWriter
 import org.apache.log4j.LogManager
 import org.apache.spark.SparkContext
 import org.apache.spark.groupon.metrics.UserMetricsSystem
-import org.apache.spark.scheduler.{SparkListener, SparkListenerJobEnd}
+import org.apache.spark.scheduler.{SparkListener, SparkListenerApplicationEnd, SparkListenerJobEnd}
 import org.apache.spark.sql.SparkSession
 
 case class Job(val config: Configuration) {
@@ -22,12 +22,6 @@ case class Job(val config: Configuration) {
   UserMetricsSystem.initialize(sparkContext, "Metorikku")
 
   val instrumentationClient = instrumentationFactory.create()
-  sparkContext.addSparkListener(new SparkListener() {
-    override def onJobEnd(taskEnd: SparkListenerJobEnd): Unit = {
-      instrumentationClient.close()
-    }
-  })
-
   config.catalog match {
     case Some(catalog) => {
       catalog.database match {
