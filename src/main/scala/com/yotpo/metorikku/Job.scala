@@ -22,11 +22,7 @@ case class Job(val config: Configuration) {
   UserMetricsSystem.initialize(sparkContext, "Metorikku")
 
   val instrumentationClient = instrumentationFactory.create()
-  sparkContext.addSparkListener(new SparkListener() {
-    override def onJobEnd(taskEnd: SparkListenerJobEnd): Unit = {
-      instrumentationClient.close()
-    }
-  })
+
 
   config.catalog match {
     case Some(catalog) => {
