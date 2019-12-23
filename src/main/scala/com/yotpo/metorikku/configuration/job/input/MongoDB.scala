@@ -2,7 +2,8 @@ package com.yotpo.metorikku.configuration.job.input
 
 import com.yotpo.metorikku.configuration.job.InputConfig
 import com.yotpo.metorikku.input.Reader
-import com.yotpo.metorikku.input.readers.elasticsearch.{ElasticsearchInput, MongoDBInput}
+import com.yotpo.metorikku.input.readers.mongodb.MongoDBInput
+
 
 case class MongoDB(uri: String,
                    database: String,

@@ -69,8 +69,8 @@ libraryDependencies ++= Seq(
   "com.uber.hoodie" % "hoodie-spark" % "0.4.7" % "provided" excludeAll(excludeHoodieTimeLineService),
   "com.uber.hoodie" % "hoodie-common" % "0.4.7" % "provided" excludeAll(excludeHoodieTimeLineService),
   "org.apache.hive" % "hive-jdbc" % "1.2.2" % "provided" excludeAll(excludeNetty, excludeNettyAll),
-  "org.elasticsearch.client" % "elasticsearch-rest-high-level-client" % "6.1.3"
-
+  "org.elasticsearch.client" % "elasticsearch-rest-high-level-client" % "6.1.3",
+  "org.mongodb.spark" %% "mongo-spark-connector" % "2.4.1"
 )
 
 // Temporary fix for https://github.com/databricks/spark-redshift/issues/315#issuecomment-285294306

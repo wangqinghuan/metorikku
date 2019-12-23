@@ -1,4 +1,4 @@
-package com.yotpo.metorikku.input.readers.elasticsearch
+package com.yotpo.metorikku.input.readers.mongodb
 
 import com.yotpo.metorikku.input.Reader
 import org.apache.spark.sql.{DataFrame, SparkSession}
